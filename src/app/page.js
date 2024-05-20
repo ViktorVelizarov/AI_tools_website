@@ -1,113 +1,111 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from 'react';
+import {Accordion, AccordionItem} from "@nextui-org/accordion";
+import {CheckboxGroup, Checkbox} from "@nextui-org/checkbox";
+
+function Tag({ children }) {
+  return (
+    <div className="justify-center px-8 py-2.5 whitespace-nowrap bg-white rounded-3xl border border-black border-solid shadow-sm max-md:px-5">
+      {children}
+    </div>
+  );
+}
+
+function ToolCard({ imgSrc, title, description, pricing }) {
+  return (
+    <article className="flex flex-col px-4 pt-4 pb-8 mt-5 w-full bg-white rounded-xl max-md:pr-5">
+      <div className="flex gap-5 justify-between w-full">
+        <div className="flex gap-5 justify-between text-xl font-bold">
+          <img loading="lazy" src={imgSrc} alt={title} className="shrink-0 aspect-[1.09] w-[51px]" />
+          <div className="my-auto">{title}</div>
+        </div>
+        {pricing && <div className="self-start mt-2.5 text-base font-extralight text-center">{pricing}</div>}
+      </div>
+      <div className="mt-6 text-base font-extralight">{description}</div>
+    </article>
+  );
+}
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+
+  const defaultContent =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+ 
+  return (  
+    <div className="flex flex-col h-screen bg-blue-200">
+      {/* Header */}
+      <header className="flex flex-col justify-between items-center px-16 py-8 bg-gray-300 relative" style={{ backgroundImage: 'url("https://i.pinimg.com/originals/32/b8/77/32b877ed4aa7778cc7d43ebb7d95a6f1.png")', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+  <h1 className="text-5xl font-bold text-center text-black max-md:max-w-full max-md:text-4xl mt-32">Find AI tools for all types of use cases</h1>
+  <form className="flex justify-center items-start px-3.5 py-4 mt-16 max-w-full text-2xl font-extralight text-black bg-white rounded-xl border border-black border-solid shadow-sm w-[750px] max-md:pr-5 max-md:mt-10">
+    <label className="sr-only" htmlFor="toolInput">Enter a tool name</label>
+    <input className="w-full bg-transparent border-none outline-none" type="text" id="toolInput" placeholder="Enter a tool name...." aria-label="Enter a tool name...." />
+  </form>
+</header>     
+
+
+      {/* Body */}
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-4  relative bg-blue-200">
+
+        {/* Filters section */}
+        <div className="md:col-span-1 p-14 ">
+          {/* Filters */}
+          <div className="self-start pr-10 ">
+            <section className="  ">
+            <h2 className="text-2xl font-bold mb-4 ml-2 text-black ">Filters</h2>
+                    <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2", "3"]} >
+              <AccordionItem key="1" className='text-black font-semibold' aria-label="Category" title="Category">
+                      <CheckboxGroup className=''>
+              <Checkbox color="primary" className='font-normal'  value="buenos-aires">AI Chatbots</Checkbox>
+              <Checkbox className='font-normal'  value="sydney">Image</Checkbox>
+              <Checkbox className='font-normal'  value="london">Automation</Checkbox>
+              <Checkbox className='font-normal'  value="tokyoo">Writing</Checkbox>
+              <Checkbox className='font-normal'  value="tokyooo">Video</Checkbox>
+            </CheckboxGroup>
+              </AccordionItem>
+              <AccordionItem key="2" className='text-black font-semibold' aria-label="Industry" title="Industry">
+              <CheckboxGroup>
+                <Checkbox className='font-normal'  value="buenos-aires">Productivity</Checkbox>
+                <Checkbox className='font-normal'  value="sydney">Marketing</Checkbox>
+                <Checkbox className='font-normal'  value="san-francisco">Entertainment</Checkbox>
+                <Checkbox className='font-normal'  value="london">Social Media</Checkbox>
+                <Checkbox className='font-normal'  value="tokyo">Business</Checkbox>
+                <Checkbox className='font-normal'  value="tokyo2">Business</Checkbox>
+                <Checkbox className='font-normal'  value="tokyo3">Eductaion</Checkbox>
+              </CheckboxGroup>
+              </AccordionItem>
+              <AccordionItem key="3" className='text-black font-semibold' aria-label="Price" title="Price">
+              <CheckboxGroup>
+                <Checkbox className='font-normal'  value="buenos-aires">Free</Checkbox>
+                <Checkbox className='font-normal'  value="sydney">Paid</Checkbox>
+                <Checkbox className='font-normal' value="san-francisco">Freemium</Checkbox>
+              </CheckboxGroup>
+              </AccordionItem>
+            </Accordion>
+             
+            </section>
+          </div>
         </div>
+
+        {/* Search and Property Cards */}
+        <div className="md:col-span-3">
+          {/* Tool Cards */}
+          <section className="self-stretch px-0.5 mt-10 max-w-[1040px] max-md:max-w-full text-black">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[...Array(9)].map((_, index) => (
+                <ToolCard
+                  key={index}
+                  imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
+                  title={`Tool ${index + 1}`}
+                  description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                  pricing="Freemium"
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
