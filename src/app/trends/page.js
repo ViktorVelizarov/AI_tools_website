@@ -24,7 +24,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-blue-200 pt-36 items-center w-screen ">
+    <div className="flex flex-col min-h-screen bg-blue-200 pt-36 items-center w-screen ">
       <div className='w-1/2' id='viz1716195527573' style={{ position: 'relative' }}>
         <noscript>
           <a href='#'>

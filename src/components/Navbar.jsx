@@ -12,10 +12,10 @@ const Navbar = () => {
     };
 
     return (
-        <div className="fixed top-0 left-0 w-full lg:p-16 lg:pt-5 p-4 z-50 ">
+        <div className="fixed top-0 left-0 w-full lg:p-16 lg:pt-0 p-4 pt-0 z-50 ">
             <nav className="p-4 rounded-lg shadow-lg flex justify-between items-center bg-gray-800">
                 <img
-                    src="https://static.wixstatic.com/media/1f0c05_16ebb10fb8914769a49e730d2b619bf4~mv2.png/v1/fill/w_325,h_71,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/agency-white-pad.png"
+                    src="scaleup-logo.png"
                     alt="Logo"
                     className="h-10"
                 />
