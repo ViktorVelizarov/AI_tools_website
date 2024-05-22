@@ -26,7 +26,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/getAItools', {
+        const response = await fetch('../api/getAItools', {
         });
         const data = await response.json();
         console.log("data:")
