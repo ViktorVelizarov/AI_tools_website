@@ -4,14 +4,6 @@ import { useState, useEffect } from 'react';
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 
-function Tag({ children }) {
-  return (
-    <div className="justify-center px-8 py-2.5 whitespace-nowrap bg-white rounded-3xl border border-black border-solid shadow-sm max-md:px-5">
-      {children}
-    </div>
-  );
-}
-
 function ToolCard({ imgSrc, title, description, pricing }) {
   return (
     <article className="flex flex-col px-4 pt-4 pb-8 mt-5 w-full bg-white rounded-xl max-md:pr-5">
@@ -29,6 +21,7 @@ function ToolCard({ imgSrc, title, description, pricing }) {
 
 export default function Home() {
   const [toolData, setToolData] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState(null); // State for selected filter
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +39,14 @@ export default function Home() {
 
     fetchData();
   }, []);
+
+  const handleCheckboxChange = (value) => {
+    setSelectedFilter(value);
+  };
+
+  const filteredTools = selectedFilter
+  ? toolData.filter((tool) => tool.Free_version === (selectedFilter === "free")) || toolData.filter((tool) => tool.Paid_version === (selectedFilter === "paid"))
+  : toolData; // Filter data or use all data if no filter is selected
 
   const defaultContent =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
@@ -71,8 +72,8 @@ export default function Home() {
             <section className=" ">
               <h2 className="text-2xl font-bold mb-4 ml-2 text-black ">Filters</h2>
               <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2", "3"]}>
-                <AccordionItem key="1" className='text-black font-semibold' aria-label="Category" title="Category">
-                  <CheckboxGroup className=''>
+                <AccordionItem   key="1" className='text-black font-semibold' aria-label="Category" title="Category">
+                  <CheckboxGroup  className=''>
                     <Checkbox color="primary" className='font-normal'  value="buenos-aires">AI Chatbots</Checkbox>
                     <Checkbox className='font-normal'  value="sydney">Image</Checkbox>
                     <Checkbox className='font-normal'  value="london">Automation</Checkbox>
@@ -92,12 +93,17 @@ export default function Home() {
                   </CheckboxGroup>
                 </AccordionItem>
                 <AccordionItem key="3" className='text-black font-semibold' aria-label="Price" title="Price">
-                  <CheckboxGroup>
-                    <Checkbox className='font-normal'  value="buenos-aires">Free</Checkbox>
-                    <Checkbox className='font-normal'  value="sydney">Paid</Checkbox>
-                    <Checkbox className='font-normal' value="san-francisco">Freemium</Checkbox>
-                  </CheckboxGroup>
-                </AccordionItem>
+                      <div>
+                        <div className="flex items-center">
+                          <input type="radio" id="free" name="priceFilter" value="free" onChange={(e) => handleCheckboxChange(e.target.value)} className="w-5 h-5" />
+                          <label className='font-normal ml-2' for="free">Free</label>
+                        </div>
+                        <div className="flex items-center mt-2">
+                          <input type="radio" id="paid" name="priceFilter" value="paid" onChange={(e) => handleCheckboxChange(e.target.value)} className="w-5 h-5" />
+                          <label className='font-normal ml-2' for="paid">Paid</label>
+                        </div>
+                      </div>
+              </AccordionItem>
               </Accordion>
             </section>
           </div>
@@ -108,17 +114,15 @@ export default function Home() {
           {/* Tool Cards */}
           <section className="self-stretch px-0.5 mt-10 max-w-[1040px] max-md:max-w-full text-black">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {toolData.map((tool, index) => (
-                <ToolCard
-                  key={index}
-                  imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
-                  // Update title with fetched tool name
-                  title={tool.tool_name}
-                  description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                  // Update pricing based on fetched data
-                  pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
-                />
-              ))}
+            {filteredTools.map((tool, index) => (
+            <ToolCard
+              key={index}
+              imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
+              title={tool.tool_name}
+              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+              pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
+            />
+          ))}
             </div>
           </section>
         </div>
