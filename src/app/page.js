@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 import { ClipLoader } from 'react-spinners';
+import { IoIosRefresh } from "react-icons/io";
 
 function ToolCard({ imgSrc, title, description, pricing, mainCategory, subCategory }) {
   return (
@@ -76,19 +77,30 @@ export default function Home() {
 
   const handleCheckboxChange = (value, type) => {
     if (type === 'main') {
-      const updatedMainCategories = selectedMainCategories.includes(value)
-        ? selectedMainCategories.filter(cat => cat !== value)
-        : [...selectedMainCategories, value];
-      setSelectedMainCategories(updatedMainCategories);
+      if (selectedMainCategories.includes(value)) {
+        setSelectedMainCategories(selectedMainCategories.filter(cat => cat !== value));
+      } else {
+        setSelectedMainCategories([...selectedMainCategories, value]);
+      }
       setSelectedSubCategories([]); // Clear subcategory filter when main category changes
+      setCurrentPage(1);
     } else if (type === 'sub') {
-      const updatedSubCategories = selectedSubCategories.includes(value)
-        ? selectedSubCategories.filter(cat => cat !== value)
-        : [...selectedSubCategories, value];
-      setSelectedSubCategories(updatedSubCategories);
+      if (selectedSubCategories.includes(value)) {
+        setSelectedSubCategories(selectedSubCategories.filter(cat => cat !== value));
+      } else {
+        setSelectedSubCategories([...selectedSubCategories, value]);
+      }
+      setCurrentPage(1);
     } else if (type === 'price') {
       setSelectedFilter(value);
+      setCurrentPage(1);
     }
+  };
+
+  const handleResetFilters = () => {
+    setSelectedMainCategories([]);
+    setSelectedSubCategories([]);
+    setSelectedFilter(null);
     setCurrentPage(1);
   };
 
@@ -133,7 +145,7 @@ export default function Home() {
         <div className="md:col-span-1 p-14">
           <div className="self-start pr-10">
             <section>
-              <h2 className="text-2xl font-bold mb-4 ml-2 text-black">Filters</h2>
+              <h2 className="text-2xl font-bold mb-4 ml-2 text-black">Filters <button onClick={handleResetFilters} className="ml-5 bg-gray-200 text-black px-1 py-1 rounded-lg"><IoIosRefresh /></button></h2>
               <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2", "3"]}>
                 <AccordionItem key="1" className='text-black font-semibold' aria-label="Category" title="Category">
                   <CheckboxGroup>
@@ -175,61 +187,61 @@ export default function Home() {
                       <input type="radio" id="paid" name="priceFilter" value="paid" onChange={() => handleCheckboxChange("paid", 'price')} checked={selectedFilter === "paid"} className="w-5 h-5" />
                       <label className='font-normal ml-2' htmlFor="paid">Paid</label>
                     </div>
-                  </div>
-                </AccordionItem>
-              </Accordion>
-            </section>
+                    </div>
+                    </AccordionItem>
+                  </Accordion>
+                </section>
+              </div>
+            </div>
+
+            <div className="md:col-span-3">
+              <section className="self-stretch px-0.5 mt-10 max-w-[1040px] max-md:max-w-full text-black">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {loading ? (
+                    <div className="flex justify-center items-center w-full col-span-1 md:col-span-2 lg:col-span-3">
+                      <ClipLoader size={50} color={"#123abc"} loading={loading} />
+                    </div>
+                  ) : (
+                    currentTools.map((tool, index) => (
+                      <ToolCard
+                        key={index}
+                        imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
+                        title={tool.tool_name}
+                        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                        pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
+                        mainCategory={tool.main_category_name}
+                        subCategory={tool.sub_category_name}
+                      />
+                    ))
+                  )}
+                </div>
+                <div className="flex justify-center mt-8 pb-11">
+                  {pageWindow[0] > 1 && (
+                    <>
+                      <button onClick={() => paginate(1)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">1</button>
+                      {pageWindow[0] > 2 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
+                    </>
+                  )}
+                  {Array.from({ length: pageWindow[1] - pageWindow[0] + 1 }, (_, i) => (
+                    <button
+                      key={pageWindow[0] + i}
+                      onClick={() => paginate(pageWindow[0] + i)}
+                      className={`px-3 py-1 mx-1 ${currentPage === pageWindow[0] + i ? 'bg-blue-500 text-white rounded-lg' : 'bg-gray-200 text-black rounded-lg'}`}
+                    >
+                      {pageWindow[0] + i}
+                    </button>
+                  ))}
+                  {pageWindow[1] < totalPages && (
+                    <>
+                      {pageWindow[1] < totalPages - 1 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
+                      <button onClick={() => paginate(totalPages)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">{totalPages}</button>
+                    </>
+                  )}
+                </div>
+              </section>
+            </div>
           </div>
         </div>
-
-        <div className="md:col-span-3">
-          <section className="self-stretch px-0.5 mt-10 max-w-[1040px] max-md:max-w-full text-black">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {loading ? (
-               
-               <div className="flex justify-center items-center w-full col-span-1 md:col-span-2 lg:col-span-3">
-               <ClipLoader size={50} color={"#123abc"} loading={loading} />
-             </div>
-           ) : (
-             currentTools.map((tool, index) => (
-               <ToolCard
-                 key={index}
-                 imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
-                 title={tool.tool_name}
-                 description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                 pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
-                 mainCategory={tool.main_category_name}
-                 subCategory={tool.sub_category_name}
-               />
-             ))
-           )}
-         </div>
-         <div className="flex justify-center mt-8 pb-11">
-           {pageWindow[0] > 1 && (
-             <>
-               <button onClick={() => paginate(1)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">1</button>
-               {pageWindow[0] > 2 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
-             </>
-           )}
-           {Array.from({ length: pageWindow[1] - pageWindow[0] + 1 }, (_, i) => (
-             <button
-               key={pageWindow[0] + i}
-               onClick={() => paginate(pageWindow[0] + i)}
-               className={`px-3 py-1 mx-1 ${currentPage === pageWindow[0] + i ? 'bg-blue-500 text-white rounded-lg' : 'bg-gray-200 text-black rounded-lg'}`}
-             >
-               {pageWindow[0] + i}
-             </button>
-           ))}
-           {pageWindow[1] < totalPages && (
-             <>
-               {pageWindow[1] < totalPages - 1 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
-               <button onClick={() => paginate(totalPages)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">{totalPages}</button>
-             </>
-           )}
-         </div>
-       </section>
-     </div>
-   </div>
- </div>
-);
+      
+  );
 }
