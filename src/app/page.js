@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
-import { ClipLoader } from 'react-spinners'; // Import the loading spinner
+import { ClipLoader } from 'react-spinners';
 
 function ToolCard({ imgSrc, title, description, pricing }) {
   return (
@@ -22,43 +22,62 @@ function ToolCard({ imgSrc, title, description, pricing }) {
 
 export default function Home() {
   const [toolData, setToolData] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState(null); // State for selected filter
-  const [loading, setLoading] = useState(true); // State for loading
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const toolsPerPage = 12; // Number of tools per page
-  const [pageWindow, setPageWindow] = useState([1, 5]); // State for page window
+  const [categories, setCategories] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const toolsPerPage = 12;
+  const [pageWindow, setPageWindow] = useState([1, 5]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchToolData = async () => {
       try {
         const response = await fetch('../api/getAItools');
         const data = await response.json();
-        console.log("data:")
-        console.log(data)
         setToolData(data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching tool data:', error);
       } finally {
-        setLoading(false); // Set loading to false once data is fetched
+        setLoading(false);
       }
     };
 
-    fetchData();
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('../api/getCategories');
+        const data = await response.json();
+    
+        // Remove duplicates from categories based on main_category_name and sub_category_name
+        const uniqueCategories = [];
+        const map = new Map();
+        for (const category of data) {
+          if (!map.has(category.main_category_name) && !map.has(category.sub_category_name)) {
+            map.set(category.main_category_name, true);
+            map.set(category.sub_category_name, true);
+            uniqueCategories.push(category);
+          }
+        }
+    
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchToolData();
+    fetchCategories();
   }, []);
 
   const handleCheckboxChange = (value) => {
     setSelectedFilter(value);
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
   const filteredTools = selectedFilter
     ? toolData.filter((tool) => tool.Free_version === (selectedFilter === "free")) || toolData.filter((tool) => tool.Paid_version === (selectedFilter === "paid"))
-    : toolData; // Filter data or use all data if no filter is selected
+    : toolData;
 
-  // Calculate the total number of pages
   const totalPages = Math.ceil(filteredTools.length / toolsPerPage);
-
-  // Get the tools to display on the current page
   const indexOfLastTool = currentPage * toolsPerPage;
   const indexOfFirstTool = indexOfLastTool - toolsPerPage;
   const currentTools = filteredTools.slice(indexOfFirstTool, indexOfLastTool);
@@ -66,7 +85,6 @@ export default function Home() {
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
 
-    // Update the page window
     const windowSize = 5;
     let newPageWindow;
     if (pageNumber <= Math.ceil(windowSize / 2)) {
@@ -81,7 +99,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-200">
-      {/* Header */}
       <header className="flex flex-col justify-between items-center px-16 py-8 bg-gray-300 relative" style={{ backgroundImage: 'url("https://i.pinimg.com/originals/32/b8/77/32b877ed4aa7778cc7d43ebb7d95a6f1.png")', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
         <h1 className="text-5xl font-bold text-center text-black max-md:max-w-full max-md:text-4xl mt-32">Find AI tools for all types of use cases</h1>
         <form className="flex justify-center items-start px-3.5 py-4 mt-16 max-w-full text-2xl font-extralight text-black bg-white rounded-xl border border-black border-solid shadow-sm w-[750px] max-md:pr-5 max-md:mt-10">
@@ -90,34 +107,28 @@ export default function Home() {
         </form>
       </header>
 
-      {/* Body */}
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 relative bg-blue-200">
-
-        {/* Filters section */}
         <div className="md:col-span-1 p-14">
-          {/* Filters */}
           <div className="self-start pr-10">
             <section>
               <h2 className="text-2xl font-bold mb-4 ml-2 text-black">Filters</h2>
-              <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2", "3"]}>
+              <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2"]}>
                 <AccordionItem key="1" className='text-black font-semibold' aria-label="Category" title="Category">
                   <CheckboxGroup>
-                    <Checkbox color="primary" className='font-normal' value="buenos-aires">AI Chatbots</Checkbox>
-                    <Checkbox className='font-normal' value="sydney">Image</Checkbox>
-                    <Checkbox className='font-normal' value="london">Automation</Checkbox>
-                    <Checkbox className='font-normal' value="tokyoo">Writing</Checkbox>
-                    <Checkbox className='font-normal' value="tokyooo">Video</Checkbox>
+                    {categories.map(category => (
+                      <Checkbox key={category.category_id} className='font-normal' value={category.main_category_name}>
+                        {category.main_category_name}
+                      </Checkbox>
+                    ))}
                   </CheckboxGroup>
                 </AccordionItem>
                 <AccordionItem key="2" className='text-black font-semibold' aria-label="Sub-category" title="Sub-category">
                   <CheckboxGroup>
-                    <Checkbox className='font-normal' value="buenos-aires">Productivity</Checkbox>
-                    <Checkbox className='font-normal' value="sydney">Marketing</Checkbox>
-                    <Checkbox className='font-normal' value="san-francisco">Entertainment</Checkbox>
-                    <Checkbox className='font-normal' value="london">Social Media</Checkbox>
-                    <Checkbox className='font-normal' value="tokyo">Business</Checkbox>
-                    <Checkbox className='font-normal' value="tokyo2">Business</Checkbox>
-                    <Checkbox className='font-normal' value="tokyo3">Education</Checkbox>
+                    {categories.map(category => (
+                      <Checkbox key={category.sub_category_id} className='font-normal' value={category.sub_category_name}>
+                        {category.sub_category_name}
+                      </Checkbox>
+                    ))}
                   </CheckboxGroup>
                 </AccordionItem>
                 <AccordionItem key="3" className='text-black font-semibold' aria-label="Price" title="Price">
@@ -137,9 +148,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Search and Property Cards */}
         <div className="md:col-span-3">
-          {/* Tool Cards */}
           <section className="self-stretch px-0.5 mt-10 max-w-[1040px] max-md:max-w-full text-black">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {loading ? (
@@ -158,7 +167,6 @@ export default function Home() {
                 ))
               )}
             </div>
-            {/* Pagination */}
             <div className="flex justify-center mt-8 pb-11">
               {pageWindow[0] > 1 && (
                 <>
