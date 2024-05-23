@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 import { ClipLoader } from 'react-spinners';
 
-function ToolCard({ imgSrc, title, description, pricing }) {
+function ToolCard({ imgSrc, title, description, pricing, mainCategory, subCategory }) {
   return (
     <article className="flex flex-col px-4 pt-4 pb-8 mt-5 w-full bg-white rounded-xl max-md:pr-5">
       <div className="flex gap-5 justify-between w-full">
@@ -15,6 +15,10 @@ function ToolCard({ imgSrc, title, description, pricing }) {
         </div>
         {pricing && <div className="self-start mt-2.5 text-base font-extralight text-center">{pricing}</div>}
       </div>
+      <div className="mt-2 text-sm font-light text-gray-600">
+        <div>Main Category: {mainCategory}</div>
+        <div>Sub Category: {subCategory}</div>
+      </div>
       <div className="mt-6 text-base font-extralight">{description}</div>
     </article>
   );
@@ -23,6 +27,8 @@ function ToolCard({ imgSrc, title, description, pricing }) {
 export default function Home() {
   const [toolData, setToolData] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [selectedMainCategories, setSelectedMainCategories] = useState([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,14 +74,30 @@ export default function Home() {
     fetchCategories();
   }, []);
 
-  const handleCheckboxChange = (value) => {
-    setSelectedFilter(value);
+  const handleCheckboxChange = (value, type) => {
+    if (type === 'main') {
+      const updatedMainCategories = selectedMainCategories.includes(value)
+        ? selectedMainCategories.filter(cat => cat !== value)
+        : [...selectedMainCategories, value];
+      setSelectedMainCategories(updatedMainCategories);
+      setSelectedSubCategories([]); // Clear subcategory filter when main category changes
+    } else if (type === 'sub') {
+      const updatedSubCategories = selectedSubCategories.includes(value)
+        ? selectedSubCategories.filter(cat => cat !== value)
+        : [...selectedSubCategories, value];
+      setSelectedSubCategories(updatedSubCategories);
+    } else if (type === 'price') {
+      setSelectedFilter(value);
+    }
     setCurrentPage(1);
   };
 
-  const filteredTools = selectedFilter
-    ? toolData.filter((tool) => tool.Free_version === (selectedFilter === "free")) || toolData.filter((tool) => tool.Paid_version === (selectedFilter === "paid"))
-    : toolData;
+  const filteredTools = toolData.filter(tool => {
+    const mainCategoryMatch = selectedMainCategories.length === 0 || selectedMainCategories.includes(tool.main_category_name);
+    const subCategoryMatch = selectedSubCategories.length === 0 || selectedSubCategories.includes(tool.sub_category_name);
+    const priceMatch = !selectedFilter || (selectedFilter === 'free' && tool.Free_version) || (selectedFilter === 'paid' && tool.Paid_version);
+    return mainCategoryMatch && subCategoryMatch && priceMatch;
+  });
 
   const totalPages = Math.ceil(filteredTools.length / toolsPerPage);
   const indexOfLastTool = currentPage * toolsPerPage;
@@ -112,11 +134,17 @@ export default function Home() {
           <div className="self-start pr-10">
             <section>
               <h2 className="text-2xl font-bold mb-4 ml-2 text-black">Filters</h2>
-              <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2"]}>
+              <Accordion selectionMode="multiple" defaultExpandedKeys={["1", "2", "3"]}>
                 <AccordionItem key="1" className='text-black font-semibold' aria-label="Category" title="Category">
                   <CheckboxGroup>
                     {categories.map(category => (
-                      <Checkbox key={category.category_id} className='font-normal' value={category.main_category_name}>
+                      <Checkbox
+                        key={category.category_id}
+                        className='font-normal'
+                        value={category.main_category_name}
+                        onChange={(e) => handleCheckboxChange(e.target.value, 'main')}
+                        checked={selectedMainCategories.includes(category.main_category_name)}
+                      >
                         {category.main_category_name}
                       </Checkbox>
                     ))}
@@ -125,7 +153,13 @@ export default function Home() {
                 <AccordionItem key="2" className='text-black font-semibold' aria-label="Sub-category" title="Sub-category">
                   <CheckboxGroup>
                     {categories.map(category => (
-                      <Checkbox key={category.sub_category_id} className='font-normal' value={category.sub_category_name}>
+                      <Checkbox
+                        key={category.sub_category_id}
+                        className='font-normal'
+                        value={category.sub_category_name}
+                        onChange={(e) => handleCheckboxChange(e.target.value, 'sub')}
+                        checked={selectedSubCategories.includes(category.sub_category_name)}
+                      >
                         {category.sub_category_name}
                       </Checkbox>
                     ))}
@@ -134,11 +168,11 @@ export default function Home() {
                 <AccordionItem key="3" className='text-black font-semibold' aria-label="Price" title="Price">
                   <div>
                     <div className="flex items-center">
-                      <input type="radio" id="free" name="priceFilter" value="free" onChange={(e) => handleCheckboxChange(e.target.value)} className="w-5 h-5" />
+                      <input type="radio" id="free" name="priceFilter" value="free" onChange={() => handleCheckboxChange("free", 'price')} checked={selectedFilter === "free"} className="w-5 h-5" />
                       <label className='font-normal ml-2' htmlFor="free">Free</label>
                     </div>
                     <div className="flex items-center mt-2">
-                      <input type="radio" id="paid" name="priceFilter" value="paid" onChange={(e) => handleCheckboxChange(e.target.value)} className="w-5 h-5" />
+                      <input type="radio" id="paid" name="priceFilter" value="paid" onChange={() => handleCheckboxChange("paid", 'price')} checked={selectedFilter === "paid"} className="w-5 h-5" />
                       <label className='font-normal ml-2' htmlFor="paid">Paid</label>
                     </div>
                   </div>
@@ -152,47 +186,50 @@ export default function Home() {
           <section className="self-stretch px-0.5 mt-10 max-w-[1040px] max-md:max-w-full text-black">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {loading ? (
-                <div className="flex justify-center items-center w-full col-span-1 md:col-span-2 lg:col-span-3">
-                  <ClipLoader size={50} color={"#123abc"} loading={loading} />
-                </div>
-              ) : (
-                currentTools.map((tool, index) => (
-                  <ToolCard
-                    key={index}
-                    imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
-                    title={tool.tool_name}
-                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                    pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
-                  />
-                ))
-              )}
-            </div>
-            <div className="flex justify-center mt-8 pb-11">
-              {pageWindow[0] > 1 && (
-                <>
-                  <button onClick={() => paginate(1)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">1</button>
-                  {pageWindow[0] > 2 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
-                </>
-              )}
-              {Array.from({ length: pageWindow[1] - pageWindow[0] + 1 }, (_, i) => (
-                <button
-                  key={pageWindow[0] + i}
-                  onClick={() => paginate(pageWindow[0] + i)}
-                  className={`px-3 py-1 mx-1 ${currentPage === pageWindow[0] + i ? 'bg-blue-500 text-white rounded-lg' : 'bg-gray-200 text-black rounded-lg'}`}
-                >
-                  {pageWindow[0] + i}
-                </button>
-              ))}
-              {pageWindow[1] < totalPages && (
-                <>
-                  {pageWindow[1] < totalPages - 1 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
-                  <button onClick={() => paginate(totalPages)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">{totalPages}</button>
-                </>
-              )}
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  );
+               
+               <div className="flex justify-center items-center w-full col-span-1 md:col-span-2 lg:col-span-3">
+               <ClipLoader size={50} color={"#123abc"} loading={loading} />
+             </div>
+           ) : (
+             currentTools.map((tool, index) => (
+               <ToolCard
+                 key={index}
+                 imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
+                 title={tool.tool_name}
+                 description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                 pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
+                 mainCategory={tool.main_category_name}
+                 subCategory={tool.sub_category_name}
+               />
+             ))
+           )}
+         </div>
+         <div className="flex justify-center mt-8 pb-11">
+           {pageWindow[0] > 1 && (
+             <>
+               <button onClick={() => paginate(1)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">1</button>
+               {pageWindow[0] > 2 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
+             </>
+           )}
+           {Array.from({ length: pageWindow[1] - pageWindow[0] + 1 }, (_, i) => (
+             <button
+               key={pageWindow[0] + i}
+               onClick={() => paginate(pageWindow[0] + i)}
+               className={`px-3 py-1 mx-1 ${currentPage === pageWindow[0] + i ? 'bg-blue-500 text-white rounded-lg' : 'bg-gray-200 text-black rounded-lg'}`}
+             >
+               {pageWindow[0] + i}
+             </button>
+           ))}
+           {pageWindow[1] < totalPages && (
+             <>
+               {pageWindow[1] < totalPages - 1 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
+               <button onClick={() => paginate(totalPages)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">{totalPages}</button>
+             </>
+           )}
+         </div>
+       </section>
+     </div>
+   </div>
+ </div>
+);
 }
