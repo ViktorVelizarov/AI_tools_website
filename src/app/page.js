@@ -24,6 +24,9 @@ export default function Home() {
   const [toolData, setToolData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState(null); // State for selected filter
   const [loading, setLoading] = useState(true); // State for loading
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const toolsPerPage = 12; // Number of tools per page
+  const [pageWindow, setPageWindow] = useState([1, 5]); // State for page window
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,11 +48,36 @@ export default function Home() {
 
   const handleCheckboxChange = (value) => {
     setSelectedFilter(value);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   const filteredTools = selectedFilter
     ? toolData.filter((tool) => tool.Free_version === (selectedFilter === "free")) || toolData.filter((tool) => tool.Paid_version === (selectedFilter === "paid"))
     : toolData; // Filter data or use all data if no filter is selected
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(filteredTools.length / toolsPerPage);
+
+  // Get the tools to display on the current page
+  const indexOfLastTool = currentPage * toolsPerPage;
+  const indexOfFirstTool = indexOfLastTool - toolsPerPage;
+  const currentTools = filteredTools.slice(indexOfFirstTool, indexOfLastTool);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+
+    // Update the page window
+    const windowSize = 5;
+    let newPageWindow;
+    if (pageNumber <= Math.ceil(windowSize / 2)) {
+      newPageWindow = [1, windowSize];
+    } else if (pageNumber + Math.floor(windowSize / 2) >= totalPages) {
+      newPageWindow = [totalPages - windowSize + 1, totalPages];
+    } else {
+      newPageWindow = [pageNumber - Math.floor(windowSize / 2), pageNumber + Math.floor(windowSize / 2)];
+    }
+    setPageWindow(newPageWindow);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-200">
@@ -119,7 +147,7 @@ export default function Home() {
                   <ClipLoader size={50} color={"#123abc"} loading={loading} />
                 </div>
               ) : (
-                filteredTools.map((tool, index) => (
+                currentTools.map((tool, index) => (
                   <ToolCard
                     key={index}
                     imgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/5131dd1527b6bfd44de733eb18eee4b5a926586836aee4060a1661450a46f233?apiKey=062b4d44d883462aa75330f48dcf750c&"
@@ -128,6 +156,30 @@ export default function Home() {
                     pricing={tool.Free_version ? "Free" : (tool.Paid_version ? "Paid" : null)}
                   />
                 ))
+              )}
+            </div>
+            {/* Pagination */}
+            <div className="flex justify-center mt-8 pb-11">
+              {pageWindow[0] > 1 && (
+                <>
+                  <button onClick={() => paginate(1)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">1</button>
+                  {pageWindow[0] > 2 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
+                </>
+              )}
+              {Array.from({ length: pageWindow[1] - pageWindow[0] + 1 }, (_, i) => (
+                <button
+                  key={pageWindow[0] + i}
+                  onClick={() => paginate(pageWindow[0] + i)}
+                  className={`px-3 py-1 mx-1 ${currentPage === pageWindow[0] + i ? 'bg-blue-500 text-white rounded-lg' : 'bg-gray-200 text-black rounded-lg'}`}
+                >
+                  {pageWindow[0] + i}
+                </button>
+              ))}
+              {pageWindow[1] < totalPages && (
+                <>
+                  {pageWindow[1] < totalPages - 1 && <span className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">...</span>}
+                  <button onClick={() => paginate(totalPages)} className="px-3 py-1 mx-1 bg-gray-200 text-black rounded-lg">{totalPages}</button>
+                </>
               )}
             </div>
           </section>
