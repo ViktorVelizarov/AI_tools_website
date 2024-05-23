@@ -109,7 +109,7 @@ export default function Home() {
                     <Checkbox className='font-normal' value="tokyooo">Video</Checkbox>
                   </CheckboxGroup>
                 </AccordionItem>
-                <AccordionItem key="2" className='text-black font-semibold' aria-label="Industry" title="Industry">
+                <AccordionItem key="2" className='text-black font-semibold' aria-label="Sub-category" title="Sub-category">
                   <CheckboxGroup>
                     <Checkbox className='font-normal' value="buenos-aires">Productivity</Checkbox>
                     <Checkbox className='font-normal' value="sydney">Marketing</Checkbox>
